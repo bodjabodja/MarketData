@@ -1,12 +1,14 @@
 //import org.apache.mina.filter.codec.ProtocolCodecException;
 import org.apache.mina.filter.codec.ProtocolCodecException;
 import quickfix.*;
+import quickfix.field.*;
 import quickfix.mina.message.FIXMessageDecoder;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -149,6 +151,29 @@ public class Analizator {
             System.out.println("size: "+size);
             int type = message.getInt(269);
             System.out.println("bid offer trade: "+ type);
+            System.out.println("Group: "+message.hasGroup(270));
+            ArrayList<Group> gl = (ArrayList<Group>) message.getGroups(279);
+            System.out.println(Arrays.asList(gl));
+            NoMDEntries noMDEntries = new NoMDEntries();
+           // message.get(noMDEntries);
+            quickfix.fix42.MarketDataSnapshotFullRefresh.NoMDEntries group =
+                    new quickfix.fix42.MarketDataSnapshotFullRefresh.NoMDEntries();
+            MDEntryType MDEntryType = new MDEntryType();
+            MDEntryPx MDEntryPx = new MDEntryPx();
+            MDEntrySize MDEntrySize = new MDEntrySize();
+            OrderID orderID = new OrderID();
+
+            message.getGroup(1, group);
+            group.get(MDEntryType);
+            group.get(MDEntryPx);
+            group.get(MDEntrySize);
+            group.get(orderID);
+
+            message.getGroup(2, group);
+            group.get(MDEntryType);
+            group.get(MDEntryPx);
+            group.get(MDEntrySize);
+
 
 
         }catch (Exception e){
