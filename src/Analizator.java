@@ -1,5 +1,4 @@
-
-
+import org.apache.mina.filter.codec.ProtocolCodecException;
 import quickfix.mina.message.FIXMessageDecoder;
 
 import javax.swing.*;
@@ -54,17 +53,17 @@ public class Analizator {
         return srcZip.substring(0, srcZip.lastIndexOf("."));
     }
 
-//    private void messageListDecoder(File file){
-//        FIXMessageDecoder fmd;
-//        try{
-//           fmd = new FIXMessageDecoder();
-//            ArrayList<String> messageList = (ArrayList<String>) fmd.extractMessages(file);
-//        }catch (UnsupportedEncodingException e){
-//            e.getMessage();
-//        }catch (IOException e){
-//            e.getMessage();
-//        }
-//    }
+    private void messageListDecoder(File file) throws ProtocolCodecException {
+        FIXMessageDecoder fmd;
+        try{
+           fmd = new FIXMessageDecoder();
+            ArrayList<String> messageList = (ArrayList<String>) fmd.extractMessages(file);
+        }catch (UnsupportedEncodingException e){
+            e.getMessage();
+        }catch (IOException e){
+            e.getMessage();
+        }
+    }
 
     private void readFile(File file){
         BufferedReader br;
