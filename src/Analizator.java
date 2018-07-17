@@ -1,16 +1,10 @@
 import org.apache.mina.filter.codec.ProtocolCodecException;
 import quickfix.*;
-import quickfix.fix40.ExecutionReport;
 import quickfix.mina.message.FIXMessageDecoder;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.*;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -70,17 +64,17 @@ public class Analizator {
                 @Override
                 public void onMessage(String message) {
                     try {
-                        lineAnalizer(message);
+                        getMessage(message);
                     } catch (ConfigError configError) {
                         configError.printStackTrace();
                     } catch (InvalidMessage invalidMessage) {
                         invalidMessage.printStackTrace();
+                    } catch (FieldNotFound fieldNotFound) {
+                        fieldNotFound.printStackTrace();
                     }
                 }
             };
-               // messageList= (ArrayList<String>) fmd.extractMessages(file);
                 fmd.extractMessages(file,listener);
-            //return messageList;
         }catch (UnsupportedEncodingException e){
             e.getMessage();
         }catch (IOException e){
@@ -95,11 +89,13 @@ public class Analizator {
             String s;
             while ((s=br.readLine())!=null){
                 System.out.println(s);
-                lineAnalizer(s);
+                getMessage(s);
                 //messageParse(s);
             }
         }catch (IOException e){
             e.getMessage();
+        } catch (FieldNotFound fieldNotFound) {
+            fieldNotFound.printStackTrace();
         }
     }
 
@@ -122,12 +118,10 @@ public class Analizator {
 
     }
 
-    private void listAnalizer(ArrayList<String> list){
+    private void listAnalizer(ArrayList<String> list) throws FieldNotFound {
         try {
-
                 for (String s:list) {
-
-                    lineAnalizer(s);
+                    getMessage(s);
                 }
 
         }catch (NullPointerException e){
@@ -140,23 +134,20 @@ public class Analizator {
 
     }
 
-    private void messageParse(String is) throws ConfigError, InvalidMessage, FileNotFoundException {
-//      //  DefaultMessageFactory messageFactory = new DefaultMessageFactory();
-       DataDictionary dataDictionary = new DataDictionary(new FileInputStream(fileInput));
-        Message message = new Message(is,dataDictionary);
-        System.out.println(message.toString());
-    }
-
-    private void lineAnalizer(String s) throws ConfigError, InvalidMessage {
+    private void getMessage(String s) throws ConfigError, InvalidMessage, FieldNotFound {
         System.out.println(s);
-        //DefaultMessageFactory dmsgf = new DefaultMessageFactory();
-        //DataDictionary dataDictionary = new DataDictionary(fileInput);
-       // MessageFactory messageFactory = new DefaultMessageFactory();
-        //String m = s.substring(s.indexOf("8=FIX.4.4"),s.length());
         Message message = new Message(s);
         System.out.println("LineAnalizer: "+message);
-        System.out.println(message.toString());
-        //ExecutionReport er = new ExecutionReport(message);
+        messageAnalizer(message);
 
+    }
+
+    private void messageAnalizer(Message message) throws FieldNotFound {
+        try {
+            double d = message.getDouble(279);
+            System.out.println("messageAnalizer: find some modify: "+d);
+        }catch (Exception e){
+            System.out.println("empty message");
+        }
     }
 }
