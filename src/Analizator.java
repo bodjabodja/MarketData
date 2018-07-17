@@ -1,3 +1,4 @@
+//import org.apache.mina.filter.codec.ProtocolCodecException;
 import org.apache.mina.filter.codec.ProtocolCodecException;
 import quickfix.*;
 import quickfix.mina.message.FIXMessageDecoder;
