@@ -15,7 +15,7 @@ import java.util.zip.ZipInputStream;
 public class Analizator {
     private String fileInput;
     private String fileOutput;
-    public Analizator() throws ProtocolCodecException, InvalidMessage, ConfigError {
+    public Analizator() throws ProtocolCodecException {
         fileInput=getFilePath("Choose log File");
         System.out.println(fileInput);
        // readFile(new File(fileInput));
@@ -65,12 +65,8 @@ public class Analizator {
                 public void onMessage(String message) {
                     try {
                         getMessage(message);
-                    } catch (ConfigError configError) {
-                        configError.printStackTrace();
                     } catch (InvalidMessage invalidMessage) {
                         invalidMessage.printStackTrace();
-                    } catch (FieldNotFound fieldNotFound) {
-                        fieldNotFound.printStackTrace();
                     }
                 }
             };
@@ -82,7 +78,7 @@ public class Analizator {
         }
     }
 
-    private void readFile(File file) throws InvalidMessage, ConfigError, IOException {
+    private void readFile(File file) throws InvalidMessage{
         BufferedReader br;
         try{
             br = new BufferedReader(new FileReader(file));
@@ -94,8 +90,6 @@ public class Analizator {
             }
         }catch (IOException e){
             e.getMessage();
-        } catch (FieldNotFound fieldNotFound) {
-            fieldNotFound.printStackTrace();
         }
     }
 
@@ -118,7 +112,7 @@ public class Analizator {
 
     }
 
-    private void listAnalizer(ArrayList<String> list) throws FieldNotFound {
+    private void listAnalizer(ArrayList<String> list) {
         try {
                 for (String s:list) {
                     getMessage(s);
@@ -126,15 +120,13 @@ public class Analizator {
 
         }catch (NullPointerException e){
             e.printStackTrace();
-        } catch (ConfigError configError) {
-            configError.printStackTrace();
         } catch (InvalidMessage invalidMessage) {
             invalidMessage.printStackTrace();
         }
 
     }
 
-    private void getMessage(String s) throws ConfigError, InvalidMessage, FieldNotFound {
+    private void getMessage(String s) throws InvalidMessage {
         System.out.println(s);
         Message message = new Message(s);
         System.out.println("LineAnalizer: "+message);
@@ -142,10 +134,22 @@ public class Analizator {
 
     }
 
-    private void messageAnalizer(Message message) throws FieldNotFound {
+    private void messageAnalizer(Message message) {
         try {
-            double d = message.getDouble(279);
+            int d = message.getInt(279);
             System.out.println("messageAnalizer: find some modify: "+d);
+            String pair = message.getString(55);
+            System.out.println("Pair: "+pair);
+            double id = message.getDouble(278);
+            System.out.println("Id: "+id);
+            double price = message.getDouble(270);
+            System.out.println("Price: "+price);
+            long size = message.getInt(271);
+            System.out.println("size: "+size);
+            int type = message.getInt(269);
+            System.out.println("bid offer trade: "+ type);
+
+
         }catch (Exception e){
             System.out.println("empty message");
         }
