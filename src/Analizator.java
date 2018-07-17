@@ -1,11 +1,16 @@
 import org.apache.mina.filter.codec.ProtocolCodecException;
+import quickfix.*;
+import quickfix.fix40.ExecutionReport;
 import quickfix.mina.message.FIXMessageDecoder;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -16,10 +21,14 @@ import java.util.zip.ZipInputStream;
 public class Analizator {
     private String fileInput;
     private String fileOutput;
-    public Analizator(){
-        fileInput=downloadView();
+    public Analizator() throws ProtocolCodecException, InvalidMessage, ConfigError {
+        fileInput=getFilePath("Choose log File");
         System.out.println(fileInput);
-       // unzipMethod(fileInput);
+       // readFile(new File(fileInput));
+        messageListDecoder(new File(fileInput));
+        //listAnalizer(messList);
+
+
     }
 
     private File unzipMethod(String fileInput){
@@ -57,7 +66,21 @@ public class Analizator {
         FIXMessageDecoder fmd;
         try{
            fmd = new FIXMessageDecoder();
-            ArrayList<String> messageList = (ArrayList<String>) fmd.extractMessages(file);
+            FIXMessageDecoder.MessageListener listener = new FIXMessageDecoder.MessageListener() {
+                @Override
+                public void onMessage(String message) {
+                    try {
+                        lineAnalizer(message);
+                    } catch (ConfigError configError) {
+                        configError.printStackTrace();
+                    } catch (InvalidMessage invalidMessage) {
+                        invalidMessage.printStackTrace();
+                    }
+                }
+            };
+               // messageList= (ArrayList<String>) fmd.extractMessages(file);
+                fmd.extractMessages(file,listener);
+            //return messageList;
         }catch (UnsupportedEncodingException e){
             e.getMessage();
         }catch (IOException e){
@@ -65,60 +88,75 @@ public class Analizator {
         }
     }
 
-    private void readFile(File file){
+    private void readFile(File file) throws InvalidMessage, ConfigError, IOException {
         BufferedReader br;
         try{
             br = new BufferedReader(new FileReader(file));
             String s;
             while ((s=br.readLine())!=null){
-
+                System.out.println(s);
+                lineAnalizer(s);
+                //messageParse(s);
             }
         }catch (IOException e){
             e.getMessage();
         }
     }
 
-    private String downloadView(){
-        JFrame frame = new JFrame("JFileChooser Popup");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        Container contentPane = frame.getContentPane();
+    private  String getFilePath(String dialogTitle){
+        String filePath="";
+        String[] filters = {"summary"};
+        JFileChooser dialog = new JFileChooser();
+        dialog.setDialogTitle(dialogTitle);
+        dialog.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("summary", filters);
+        dialog.setFileFilter(filter);
+        try{
+            dialog.showOpenDialog(null);
+            filePath =dialog.getSelectedFile().getAbsolutePath();}
+        catch(NullPointerException e){
+            System.out.println("Canceled");
+            System.exit(0);
+        }
+        return filePath;
 
-        final JLabel directoryLabel = new JLabel(" ");
-        directoryLabel.setFont(new Font("Serif", Font.BOLD | Font.ITALIC, 36));
-        contentPane.add(directoryLabel, BorderLayout.NORTH);
-
-        final JLabel filenameLabel = new JLabel(" ");
-        filenameLabel.setFont(new Font("Serif", Font.BOLD | Font.ITALIC, 36));
-        contentPane.add(filenameLabel, BorderLayout.SOUTH);
-
-        JFileChooser fileChooser = new JFileChooser(".");
-        fileChooser.setControlButtonsAreShown(false);
-        contentPane.add(fileChooser, BorderLayout.CENTER);
-
-        ActionListener actionListener = new ActionListener() {
-            public void actionPerformed(ActionEvent actionEvent) {
-                JFileChooser theFileChooser = (JFileChooser) actionEvent
-                        .getSource();
-                String command = actionEvent.getActionCommand();
-                if (command.equals(JFileChooser.APPROVE_SELECTION)) {
-                    File selectedFile = theFileChooser.getSelectedFile();
-                    fileInput = selectedFile.getAbsolutePath();
-                    directoryLabel.setText(selectedFile.getParent());
-                    filenameLabel.setText(selectedFile.getName());
-                } else if (command.equals(JFileChooser.CANCEL_SELECTION)) {
-                    directoryLabel.setText(" ");
-                    filenameLabel.setText(" ");
-                }
-            }
-        };
-        fileChooser.addActionListener(actionListener);
-
-        frame.pack();
-        frame.setVisible(true);
-        return fileInput;
     }
 
-    private void lineAnalizer(String line){
+    private void listAnalizer(ArrayList<String> list){
+        try {
+
+                for (String s:list) {
+
+                    lineAnalizer(s);
+                }
+
+        }catch (NullPointerException e){
+            e.printStackTrace();
+        } catch (ConfigError configError) {
+            configError.printStackTrace();
+        } catch (InvalidMessage invalidMessage) {
+            invalidMessage.printStackTrace();
+        }
+
+    }
+
+    private void messageParse(String is) throws ConfigError, InvalidMessage, FileNotFoundException {
+//      //  DefaultMessageFactory messageFactory = new DefaultMessageFactory();
+       DataDictionary dataDictionary = new DataDictionary(new FileInputStream(fileInput));
+        Message message = new Message(is,dataDictionary);
+        System.out.println(message.toString());
+    }
+
+    private void lineAnalizer(String s) throws ConfigError, InvalidMessage {
+        System.out.println(s);
+        //DefaultMessageFactory dmsgf = new DefaultMessageFactory();
+        //DataDictionary dataDictionary = new DataDictionary(fileInput);
+       // MessageFactory messageFactory = new DefaultMessageFactory();
+        //String m = s.substring(s.indexOf("8=FIX.4.4"),s.length());
+        Message message = new Message(s);
+        System.out.println("LineAnalizer: "+message);
+        System.out.println(message.toString());
+        //ExecutionReport er = new ExecutionReport(message);
 
     }
 }
