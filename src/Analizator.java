@@ -161,11 +161,11 @@ public class Analizator {
             quickfix.fix43.MessageFactory msg = new quickfix.fix43.MessageFactory();
             Group group11 =msg.create("FIX.4.4",typeMsg,NoMDEntries.FIELD);
            // quickfix.Group group = new quickfix.Group(279,269,order);
-            Group gl = message.getGroup(268,group11);
+            Group gl = message.getGroup(1,group11);
 
            // System.out.println("279 groups: "+message.getGroup(268,group).toString());
             //System.out.println("279 groups: "+message.getGroup(groupCnt,group.getFieldTag()));
-          //  NoMDEntries noMDEntries = new NoMDEntries();
+           NoMDEntries noMDEntries = new NoMDEntries();
            // message.get(noMDEntries);
           // ArrayList<Group> gl = (ArrayList<Group>) message.getGroups(279);
 //            quickfix.fix42.MarketDataSnapshotFullRefresh.NoMDEntries group =
