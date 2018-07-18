@@ -252,3 +252,9 @@ class MessageActionDelete{
         System.out.println("delete offer: "+id);
     }
 }
+
+class ReportTable{
+    ReportTable(){
+
+    }
+}
