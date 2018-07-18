@@ -1,16 +1,11 @@
-//import org.apache.mina.filter.codec.ProtocolCodecException;
 import org.apache.mina.filter.codec.ProtocolCodecException;
 import quickfix.*;
-import quickfix.field.*;
-import quickfix.fix43.MarketDataSnapshotFullRefresh;
 import quickfix.mina.message.FIXMessageDecoder;
-
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.regex.Matcher;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -25,7 +20,6 @@ public class Analizator {
         System.out.println(fileInput);
        // readFile(new File(fileInput));
         messageListDecoder(new File(fileInput));
-        //listAnalizer(messList);
 
 
     }
@@ -91,7 +85,6 @@ public class Analizator {
             while ((s=br.readLine())!=null){
                 System.out.println(s);
                 getMessage(s);
-                //messageParse(s);
             }
         }catch (IOException e){
             e.getMessage();
@@ -117,28 +110,10 @@ public class Analizator {
 
     }
 
-    private void listAnalizer(ArrayList<String> list) {
-        try {
-                for (String s:list) {
-                    getMessage(s);
-                }
-
-        }catch (NullPointerException e){
-            e.printStackTrace();
-        } catch (InvalidMessage invalidMessage) {
-            invalidMessage.printStackTrace();
-        }
-
-    }
-
     private void getMessage(String s) throws InvalidMessage {
         System.out.println(s);
         String[] mar = s.split("\001");
         arrayAnalizer(mar);
-        //Message message = new Message(s);
-        //System.out.println("LineAnalizer: "+message);
-        //messageAnalizer(message);
-
     }
 
     private void arrayAnalizer(String[] array){
@@ -201,66 +176,6 @@ public class Analizator {
         System.out.println("Finish message!");
     }
 
-    private void messageAnalizer(Message message) {
-        try {
-            String mssg= message.toString();
-            String[] mar = mssg.split("\001");
-
-            String typeMsg = message.getHeader().getString(35);
-            int d = message.getInt(279);
-            System.out.println("messageAnalizer: find some modify: "+d);
-            String pair = message.getString(55);
-            System.out.println("Pair: "+pair);
-            double id = message.getDouble(278);
-            System.out.println("Id: "+id);
-            double price = message.getDouble(270);
-            System.out.println("Price: "+price);
-            long size = message.getInt(271);
-            System.out.println("size: "+size);
-            int type = message.getInt(269);
-            int groupCnt = message.getInt(268);
-            System.out.println("bid offer trade: "+ type);
-           // System.out.println("Group: "+message.hasGroup(270));
-           // ArrayList<Group> gl = (ArrayList<Group>) message.getGroups(279);
-           // System.out.println(Arrays.asList(gl));
-            int[] order = {269,278,55,270,271};
-            quickfix.fix43.MessageFactory msg = new quickfix.fix43.MessageFactory();
-            Group group11 =msg.create("FIX.4.4",typeMsg,NoMDEntries.FIELD);
-           // quickfix.Group group = new quickfix.Group(279,269,order);
-            Group gl = message.getGroup(1,group11);
-
-           // System.out.println("279 groups: "+message.getGroup(268,group).toString());
-            //System.out.println("279 groups: "+message.getGroup(groupCnt,group.getFieldTag()));
-           NoMDEntries noMDEntries = new NoMDEntries();
-           // message.get(noMDEntries);
-          // ArrayList<Group> gl = (ArrayList<Group>) message.getGroups(279);
-//            quickfix.fix42.MarketDataSnapshotFullRefresh.NoMDEntries group =
-//                    new quickfix.fix42.MarketDataSnapshotFullRefresh.NoMDEntries();
-//            MDEntryType MDEntryType = new MDEntryType();
-//            MDEntryPx MDEntryPx = new MDEntryPx();
-//            MDEntrySize MDEntrySize = new MDEntrySize();
-//            OrderID orderID = new OrderID();
-//
-//            message.getGroup(1, group);
-//            group.get(MDEntryType);
-//            group.get(MDEntryPx);
-//            group.get(MDEntrySize);
-//            group.get(orderID);
-//
-//            message.getGroup(2, group);
-//            group.get(MDEntryType);
-//            group.get(MDEntryPx);
-//            group.get(MDEntrySize);
-            //DataDictionary dd = new DataDictionary("asdfasf:"+String.valueOf(message));
-           // System.out.println("agsdfgdsfg: "+dd.getGroup(String.valueOf(message),279));
-
-
-
-        }catch (Exception e){
-            e.printStackTrace();
-            System.out.println("empty message");
-        }
-    }
 }
 
 class MessageActionNew{
