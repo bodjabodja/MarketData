@@ -10,6 +10,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.regex.Matcher;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -132,14 +133,79 @@ public class Analizator {
 
     private void getMessage(String s) throws InvalidMessage {
         System.out.println(s);
-        Message message = new Message(s);
-        System.out.println("LineAnalizer: "+message);
-        messageAnalizer(message);
+        String[] mar = s.split("\001");
+        arrayAnalizer(mar);
+        //Message message = new Message(s);
+        //System.out.println("LineAnalizer: "+message);
+        //messageAnalizer(message);
 
+    }
+
+    private void arrayAnalizer(String[] array){
+        System.out.println("Start analize message");
+        ArrayList<String> list = new ArrayList<>(Arrays.asList(array));
+        String typeOfMeth="";
+        boolean bool=false;
+        String id="";
+        String pair="";
+        String price="";
+        String size="";
+        ArrayList<MessageActionNew> newActions=new ArrayList<>();
+        for (String s : list) {
+            if(s.contains("279")){
+                typeOfMeth=s.substring(s.length()-1,s.length());
+            }
+
+            if(s.contains("269")){
+                String type = s.substring(s.length()-1,s.length());
+                if(type.equals("0")){
+                    bool=true;
+                }
+
+                if(type.equals("1")){
+                    bool=false;
+                }
+            }
+
+            if(s.contains("278")){
+                id=s.substring(4);
+            }
+
+            if(s.contains("55")){
+                pair=s.substring(3);
+            }
+
+            if(s.contains("270")){
+                price=s.substring(4);
+            }
+
+            if(s.contains("271")){
+                size=s.substring(4);
+            }
+
+            if(typeOfMeth.equals("0") && !id.equals("") && !pair.equals("") && !price.equals("") && !size.equals("")){
+                newActions.add(new MessageActionNew(id,pair,bool,price,size));
+                id=pair=price=size="";
+            }
+
+            if(typeOfMeth.equals("2") && !id.equals("") && !pair.equals("")){
+                new MessageActionDelete(bool,id,pair);
+                id="";
+                pair="";
+            }
+        }
+
+        for (MessageActionNew m:newActions) {
+            m.writeToTable();
+        }
+        System.out.println("Finish message!");
     }
 
     private void messageAnalizer(Message message) {
         try {
+            String mssg= message.toString();
+            String[] mar = mssg.split("\001");
+
             String typeMsg = message.getHeader().getString(35);
             int d = message.getInt(279);
             System.out.println("messageAnalizer: find some modify: "+d);
@@ -194,5 +260,80 @@ public class Analizator {
             e.printStackTrace();
             System.out.println("empty message");
         }
+    }
+}
+
+class MessageActionNew{
+    private String id;
+    private String pair;
+    private boolean bid=false;
+    private boolean offer=false;
+    private String price;
+    private String size;
+
+    MessageActionNew(String id, String pair, boolean bool, String price, String size){
+        this.id=id;
+        this.pair=pair;
+        if(bool){
+            bid=true;
+        }else{
+            offer=true;
+        }
+        this.price=price;
+        this.size=size;
+    }
+
+    public void writeToTable(){
+        if(bid){
+            writeToBids();
+        }
+
+        if(offer){
+            writeToOffers();
+        }
+    }
+
+    private void writeToBids(){
+        System.out.println("Bid+1 : "+id);
+    }
+
+    private  void writeToOffers(){
+        System.out.println("Offer+1: "+id);
+    }
+}
+
+class MessageActionDelete{
+    private String id;
+    private String pair;
+    private boolean bid=false;
+    private boolean offer=false;
+
+    MessageActionDelete(boolean bool,String id, String pair){
+        if(bool){
+            bid=true;
+        }else{
+            offer=true;
+        }
+        this.id=id;
+        this.pair=pair;
+        deleteFromTable();
+    }
+
+    private void deleteFromTable(){
+        if(bid){
+            writeToBids();
+        }
+
+        if(offer){
+            writeToOffers();
+        }
+    }
+
+    private void writeToBids(){
+        System.out.println("Delete bid : "+id);
+    }
+
+    private  void writeToOffers(){
+        System.out.println("delete offer: "+id);
     }
 }
