@@ -2,6 +2,7 @@
 import org.apache.mina.filter.codec.ProtocolCodecException;
 import quickfix.*;
 import quickfix.field.*;
+import quickfix.fix43.MarketDataSnapshotFullRefresh;
 import quickfix.mina.message.FIXMessageDecoder;
 
 import javax.swing.*;
@@ -139,6 +140,7 @@ public class Analizator {
 
     private void messageAnalizer(Message message) {
         try {
+            String typeMsg = message.getHeader().getString(35);
             int d = message.getInt(279);
             System.out.println("messageAnalizer: find some modify: "+d);
             String pair = message.getString(55);
@@ -150,33 +152,46 @@ public class Analizator {
             long size = message.getInt(271);
             System.out.println("size: "+size);
             int type = message.getInt(269);
+            int groupCnt = message.getInt(268);
             System.out.println("bid offer trade: "+ type);
-            System.out.println("Group: "+message.hasGroup(270));
-            ArrayList<Group> gl = (ArrayList<Group>) message.getGroups(279);
-            System.out.println(Arrays.asList(gl));
-            NoMDEntries noMDEntries = new NoMDEntries();
+           // System.out.println("Group: "+message.hasGroup(270));
+           // ArrayList<Group> gl = (ArrayList<Group>) message.getGroups(279);
+           // System.out.println(Arrays.asList(gl));
+            int[] order = {269,278,55,270,271};
+            quickfix.fix43.MessageFactory msg = new quickfix.fix43.MessageFactory();
+            Group group11 =msg.create("FIX.4.4",typeMsg,NoMDEntries.FIELD);
+           // quickfix.Group group = new quickfix.Group(279,269,order);
+            Group gl = message.getGroup(268,group11);
+
+           // System.out.println("279 groups: "+message.getGroup(268,group).toString());
+            //System.out.println("279 groups: "+message.getGroup(groupCnt,group.getFieldTag()));
+          //  NoMDEntries noMDEntries = new NoMDEntries();
            // message.get(noMDEntries);
-            quickfix.fix42.MarketDataSnapshotFullRefresh.NoMDEntries group =
-                    new quickfix.fix42.MarketDataSnapshotFullRefresh.NoMDEntries();
-            MDEntryType MDEntryType = new MDEntryType();
-            MDEntryPx MDEntryPx = new MDEntryPx();
-            MDEntrySize MDEntrySize = new MDEntrySize();
-            OrderID orderID = new OrderID();
-
-            message.getGroup(1, group);
-            group.get(MDEntryType);
-            group.get(MDEntryPx);
-            group.get(MDEntrySize);
-            group.get(orderID);
-
-            message.getGroup(2, group);
-            group.get(MDEntryType);
-            group.get(MDEntryPx);
-            group.get(MDEntrySize);
+          // ArrayList<Group> gl = (ArrayList<Group>) message.getGroups(279);
+//            quickfix.fix42.MarketDataSnapshotFullRefresh.NoMDEntries group =
+//                    new quickfix.fix42.MarketDataSnapshotFullRefresh.NoMDEntries();
+//            MDEntryType MDEntryType = new MDEntryType();
+//            MDEntryPx MDEntryPx = new MDEntryPx();
+//            MDEntrySize MDEntrySize = new MDEntrySize();
+//            OrderID orderID = new OrderID();
+//
+//            message.getGroup(1, group);
+//            group.get(MDEntryType);
+//            group.get(MDEntryPx);
+//            group.get(MDEntrySize);
+//            group.get(orderID);
+//
+//            message.getGroup(2, group);
+//            group.get(MDEntryType);
+//            group.get(MDEntryPx);
+//            group.get(MDEntrySize);
+            //DataDictionary dd = new DataDictionary("asdfasf:"+String.valueOf(message));
+           // System.out.println("agsdfgdsfg: "+dd.getGroup(String.valueOf(message),279));
 
 
 
         }catch (Exception e){
+            e.printStackTrace();
             System.out.println("empty message");
         }
     }
