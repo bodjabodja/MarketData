@@ -1,3 +1,4 @@
+import com.sun.deploy.panel.JreTableModel;
 import org.apache.mina.filter.codec.ProtocolCodecException;
 import quickfix.*;
 import quickfix.mina.message.FIXMessageDecoder;
@@ -19,13 +20,14 @@ public class Analizator {
     private String fileInput;
     private String fileOutput;
     private ArrayList<MessageActionNew> messageActionNewsList = new ArrayList<>();
+    private ReportTable rt;
     public Analizator() throws ProtocolCodecException {
-      //  fileInput=getFilePath("Choose log File");
-      //  System.out.println(fileInput);
-       messageActionNewsList.add(new MessageActionNew("","",false,"",""));
-       messageActionNewsList.add(new MessageActionNew("asdgf","",true,"",""));
-        ReportTable rt = new ReportTable(messageActionNewsList);
-
+        fileInput=getFilePath("Choose log File");
+        System.out.println(fileInput);
+        //messageActionNewsList.add(new MessageActionNew("","",false,"",""));
+       // messageActionNewsList.add(new MessageActionNew("asdgf","",true,"",""));
+        rt = new ReportTable(messageActionNewsList);
+       // rt.addDynamicRow(new MessageActionNew("asdgf","",true,"",""));
 
         //messageListDecoder(new File(fileInput));
 
@@ -134,6 +136,7 @@ public class Analizator {
         String price="";
         String size="";
         ArrayList<MessageActionNew> newActions=new ArrayList<>();
+        ArrayList<MessageActionDelete> dellActions = new ArrayList<>();
         for (String s : list) {
             if(s.contains("279")){
                 typeOfMeth=s.substring(s.length()-1,s.length());
@@ -172,15 +175,17 @@ public class Analizator {
             }
 
             if(typeOfMeth.equals("2") && !id.equals("") && !pair.equals("")){
-                new MessageActionDelete(bool,id,pair);
+                dellActions.add(new MessageActionDelete(bool,id,pair));
                 id="";
                 pair="";
             }
         }
 
         for (MessageActionNew m:newActions) {
-            m.writeToTable();
+            rt.addDynamicRow(m);
         }
+
+
         System.out.println("Finish message!");
     }
 
@@ -270,31 +275,42 @@ class MessageActionDelete{
 class ReportTable{
     private JTable jTable;
     private JFrame jfrm;
-    ArrayList<MessageActionNew> messageActionNewArrayList = new ArrayList<>();
+    private ReportTableModel rt;
+    private ArrayList<MessageActionNew> messageActionNewArrayList = new ArrayList<>();
     ReportTable(ArrayList<MessageActionNew> messageActionNewArrayList){
-        JFrame jfrm = new JFrame("Report");
+        this.messageActionNewArrayList=messageActionNewArrayList;
+        jfrm = new JFrame("Report");
         jfrm.getContentPane().setLayout(new FlowLayout());
         jfrm.setSize(300, 170);
         jfrm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        JTable jTable = new JTable(new ReportTableModel(messageActionNewArrayList));
+        rt= new ReportTableModel(messageActionNewArrayList);
+        this.jTable = new JTable(rt);
         //this.jTable = new JTable(new DefaultTableModel());
-        JScrollPane jscrlp = new JScrollPane(jTable);
-        jTable.setPreferredScrollableViewportSize(new Dimension(250, 100));
-        jfrm.getContentPane().add(jscrlp);
-        jfrm.setVisible(true);
+//        JScrollPane jscrlp = new JScrollPane(jTable);
+//        jTable.setPreferredScrollableViewportSize(new Dimension(250, 100));
+//        jfrm.getContentPane().add(jscrlp);
+//        jfrm.setVisible(true);
     }
 
 //    public void addMesage(MessageActionNew messageActionNew){
 //        //jTable.add(messageActionNew.getId(),messageActionNew.getBid(),messageActionNew.getPair(),messageActionNew.getPrice(),messageActionNew.getSize());
 //
 //    }
+    public void addDynamicRow(MessageActionNew messageActionNew){
+        messageActionNewArrayList.add(messageActionNew);
+        rt.fireTableDataChanged();
+    }
 
-//    public void showTable(){
-//        JScrollPane jscrlp = new JScrollPane(jTable);
-//        jTable.setPreferredScrollableViewportSize(new Dimension(250, 100));
-//        jfrm.getContentPane().add(jscrlp);
-//        jfrm.setVisible(true);
-//    }
+    public void deleteRow(){
+
+    }
+
+    public void showTable(){
+        JScrollPane jscrlp = new JScrollPane(jTable);
+        jTable.setPreferredScrollableViewportSize(new Dimension(250, 100));
+        jfrm.getContentPane().add(jscrlp);
+        jfrm.setVisible(true);
+    }
 }
 
 class ReportTableModel extends AbstractTableModel {
