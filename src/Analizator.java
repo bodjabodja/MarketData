@@ -4,6 +4,7 @@ import quickfix.mina.message.FIXMessageDecoder;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -17,10 +18,14 @@ import java.util.zip.ZipInputStream;
 public class Analizator {
     private String fileInput;
     private String fileOutput;
+    private ArrayList<MessageActionNew> messageActionNewsList = new ArrayList<>();
     public Analizator() throws ProtocolCodecException {
-        fileInput=getFilePath("Choose log File");
-        System.out.println(fileInput);
-       ReportTable rt = new ReportTable();
+      //  fileInput=getFilePath("Choose log File");
+      //  System.out.println(fileInput);
+       messageActionNewsList.add(new MessageActionNew("","",false,"",""));
+       messageActionNewsList.add(new MessageActionNew("asdgf","",true,"",""));
+        ReportTable rt = new ReportTable(messageActionNewsList);
+
 
         //messageListDecoder(new File(fileInput));
 
@@ -184,29 +189,28 @@ public class Analizator {
 class MessageActionNew{
     private String id;
     private String pair;
-    private boolean bid=false;
-    private boolean offer=false;
+    private String bid;
     private String price;
     private String size;
+    private boolean bool=false;
 
     MessageActionNew(String id, String pair, boolean bool, String price, String size){
         this.id=id;
         this.pair=pair;
         if(bool){
-            bid=true;
+            bid="Bid";
+            this.bool=true;
         }else{
-            offer=true;
+            bid="Offer";
         }
         this.price=price;
         this.size=size;
     }
 
     public void writeToTable(){
-        if(bid){
+        if(bool){
             writeToBids();
-        }
-
-        if(offer){
+        } else {
             writeToOffers();
         }
     }
@@ -218,6 +222,12 @@ class MessageActionNew{
     private  void writeToOffers(){
         System.out.println("Offer+1: "+id);
     }
+
+    public String getId(){return id;}
+    public String getPrice(){return price;}
+    public String getSize(){return size;}
+    public String getBid(){return  bid;}
+    public String getPair(){return pair;}
 }
 
 class MessageActionDelete{
@@ -258,34 +268,71 @@ class MessageActionDelete{
 
 
 class ReportTable{
-    ReportTable(){
-        JFrame jfrm = new JFrame("JTableExample");
+    private JTable jTable;
+    private JFrame jfrm;
+    ArrayList<MessageActionNew> messageActionNewArrayList = new ArrayList<>();
+    ReportTable(ArrayList<MessageActionNew> messageActionNewArrayList){
+        JFrame jfrm = new JFrame("Report");
         jfrm.getContentPane().setLayout(new FlowLayout());
         jfrm.setSize(300, 170);
         jfrm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        JTable jTable = new JTable(new ReportTableModel());
+        JTable jTable = new JTable(new ReportTableModel(messageActionNewArrayList));
+        //this.jTable = new JTable(new DefaultTableModel());
         JScrollPane jscrlp = new JScrollPane(jTable);
         jTable.setPreferredScrollableViewportSize(new Dimension(250, 100));
         jfrm.getContentPane().add(jscrlp);
         jfrm.setVisible(true);
     }
+
+//    public void addMesage(MessageActionNew messageActionNew){
+//        //jTable.add(messageActionNew.getId(),messageActionNew.getBid(),messageActionNew.getPair(),messageActionNew.getPrice(),messageActionNew.getSize());
+//
+//    }
+
+//    public void showTable(){
+//        JScrollPane jscrlp = new JScrollPane(jTable);
+//        jTable.setPreferredScrollableViewportSize(new Dimension(250, 100));
+//        jfrm.getContentPane().add(jscrlp);
+//        jfrm.setVisible(true);
+//    }
 }
 
 class ReportTableModel extends AbstractTableModel {
+    private ArrayList<MessageActionNew> messageActionNewArrayList;
+    ReportTableModel(ArrayList<MessageActionNew> messageActionNewArrayList){
+        this.messageActionNewArrayList=messageActionNewArrayList;
+    }
+
+    public void deleteRow(){
+        messageActionNewArrayList.remove(1);
+    }
 
     @Override
     public int getRowCount() {
-        return 1;
+        return messageActionNewArrayList.size();
     }
 
     @Override
     public int getColumnCount() {
-        return 4;
+        return 5;
     }
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        return null;
+        switch (columnIndex){
+            case 0:
+                return messageActionNewArrayList.get(rowIndex).getId();
+            case 1:
+                return messageActionNewArrayList.get(rowIndex).getBid();
+            case 2:
+                return messageActionNewArrayList.get(rowIndex).getPair();
+            case 3:
+                return messageActionNewArrayList.get(rowIndex).getPrice();
+            case 4:
+                return messageActionNewArrayList.get(rowIndex).getSize();
+            default:
+                return "";
+        }
     }
 
     @Override
@@ -305,4 +352,9 @@ class ReportTableModel extends AbstractTableModel {
                 return "Other";
         }
     }
+
+//    @Override
+//    public Object getValueAt(int rowIndex, int columnIndex) {
+//        return null;
+//    }
 }
