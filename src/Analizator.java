@@ -3,6 +3,8 @@ import quickfix.*;
 import quickfix.mina.message.FIXMessageDecoder;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.AbstractTableModel;
+import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,8 +20,9 @@ public class Analizator {
     public Analizator() throws ProtocolCodecException {
         fileInput=getFilePath("Choose log File");
         System.out.println(fileInput);
-       // readFile(new File(fileInput));
-        messageListDecoder(new File(fileInput));
+       ReportTable rt = new ReportTable();
+
+        //messageListDecoder(new File(fileInput));
 
 
     }
@@ -236,25 +239,70 @@ class MessageActionDelete{
 
     private void deleteFromTable(){
         if(bid){
-            writeToBids();
+            deleteBid();
         }
 
         if(offer){
-            writeToOffers();
+            deleteOffer();
         }
     }
 
-    private void writeToBids(){
+    private void deleteBid(){
         System.out.println("Delete bid : "+id);
     }
 
-    private  void writeToOffers(){
+    private  void deleteOffer(){
         System.out.println("delete offer: "+id);
     }
 }
 
+
 class ReportTable{
     ReportTable(){
+        JFrame jfrm = new JFrame("JTableExample");
+        jfrm.getContentPane().setLayout(new FlowLayout());
+        jfrm.setSize(300, 170);
+        jfrm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        JTable jTable = new JTable(new ReportTableModel());
+        JScrollPane jscrlp = new JScrollPane(jTable);
+        jTable.setPreferredScrollableViewportSize(new Dimension(250, 100));
+        jfrm.getContentPane().add(jscrlp);
+        jfrm.setVisible(true);
+    }
+}
 
+class ReportTableModel extends AbstractTableModel {
+
+    @Override
+    public int getRowCount() {
+        return 1;
+    }
+
+    @Override
+    public int getColumnCount() {
+        return 4;
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        return null;
+    }
+
+    @Override
+    public String getColumnName(int c){
+        switch (c){
+            case 0:
+                return "ID";
+            case 1:
+                return "Side";
+            case 2:
+                return "Pair";
+            case 3:
+                return "Price";
+            case 4:
+                return "Size";
+            default:
+                return "Other";
+        }
     }
 }
