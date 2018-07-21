@@ -21,7 +21,7 @@ public class Analizator {
     private String fileInput;
     private String fileOutput;
    // private ArrayList<MessageActionNew> messageActionNewsList = new ArrayList<>();
-   // private ReportTable rt;
+    private ReportTable rt=null;
     public Analizator() throws ProtocolCodecException {
         fileInput=getFilePath("Choose log File");
         System.out.println(fileInput);
@@ -134,14 +134,14 @@ public class Analizator {
         System.out.println("Start analize message");
         ArrayList<String> list = new ArrayList<>(Arrays.asList(array));
         String typeOfMeth="";
-        boolean bool=false;
+        String bool="";
         String id="";
         String pair="";
         String price="";
         String size="";
-        ReportTable rt=null;
+
         ArrayList<MessageActionNew> newActions=new ArrayList<>();
-        ArrayList<MessageActionDelete> dellActions = new ArrayList<>();
+        ArrayList<MessageActionNew> dellActions = new ArrayList<>();
         for (String s : list) {
             if(s.contains("279")){
                 typeOfMeth=s.substring(s.length()-1,s.length());
@@ -150,11 +150,11 @@ public class Analizator {
             if(s.contains("269")){
                 String type = s.substring(s.length()-1,s.length());
                 if(type.equals("0")){
-                    bool=true;
+                    bool="bid";
                 }
 
                 if(type.equals("1")){
-                    bool=false;
+                    bool="offer";
                 }
             }
 
@@ -181,13 +181,15 @@ public class Analizator {
             }
 
             if(typeOfMeth.equals("2") && !id.equals("") && !pair.equals("")){
-                dellActions.add(new MessageActionDelete(bool,id,pair));
+              //  rt.deleteRow(id);
+                dellActions.add(new MessageActionNew(id,pair,"Delete","0","0"));
                 id="";
                 pair="";
             }
         }
 
         if (newActions.size() > 0) {
+            newActions.addAll(dellActions);
             rt = new ReportTable(newActions);
           //  rt.showTable();
             try {
@@ -214,35 +216,13 @@ class MessageActionNew{
     private String bid;
     private String price;
     private String size;
-    private boolean bool=false;
 
-    MessageActionNew(String id, String pair, boolean bool, String price, String size){
+    MessageActionNew(String id, String pair, String bool, String price, String size){
         this.id=id;
         this.pair=pair;
-        if(bool){
-            bid="Bid";
-            this.bool=true;
-        }else{
-            bid="Offer";
-        }
+        this.bid=bool;
         this.price=price;
         this.size=size;
-    }
-
-    public void writeToTable(){
-        if(bool){
-            writeToBids();
-        } else {
-            writeToOffers();
-        }
-    }
-
-    private void writeToBids(){
-        System.out.println("Bid+1 : "+id);
-    }
-
-    private  void writeToOffers(){
-        System.out.println("Offer+1: "+id);
     }
 
     public String getId(){return id;}
