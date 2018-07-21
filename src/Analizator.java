@@ -30,34 +30,6 @@ public class Analizator {
 
     }
 
-    private File unzipMethod(String fileInput){
-        final String dstDirectory = destinationDirectory(fileInput);
-        final File dstDir = new File(dstDirectory);
-        if (!dstDir.exists()) {
-            dstDir.mkdir();
-        }
-        File nextFile = null;
-        try{
-            ZipInputStream zis = new ZipInputStream(new FileInputStream(fileInput));
-            ZipEntry ze = zis.getNextEntry();
-            String nextFileName;
-            while (ze != null) {
-                nextFileName = ze.getName();
-                nextFile = new File(dstDirectory + File.separator
-                        + nextFileName);
-                System.out.println("Распаковываем: "
-                        + nextFile.getAbsolutePath());
-            }
-            zis.close();
-
-        }catch (FileNotFoundException e){
-            e.getMessage();
-        }catch (IOException e1){
-            e1.getMessage();
-        }
-        return nextFile;
-    }
-
     public void unZipIt(){
 
         byte[] buffer = new byte[1024];
@@ -108,10 +80,6 @@ public class Analizator {
         }
     }
 
-    private String destinationDirectory(final String srcZip) {
-        return srcZip.substring(0, srcZip.lastIndexOf("."));
-    }
-
     private void messageListDecoder(File file) throws ProtocolCodecException {
         FIXMessageDecoder fmd;
         try{
@@ -129,20 +97,6 @@ public class Analizator {
                 fmd.extractMessages(file,listener);
         }catch (UnsupportedEncodingException e){
             e.getMessage();
-        }catch (IOException e){
-            e.getMessage();
-        }
-    }
-
-    private void readFile(File file) throws InvalidMessage{
-        BufferedReader br;
-        try{
-            br = new BufferedReader(new FileReader(file));
-            String s;
-            while ((s=br.readLine())!=null){
-                System.out.println(s);
-                getMessage(s);
-            }
         }catch (IOException e){
             e.getMessage();
         }
