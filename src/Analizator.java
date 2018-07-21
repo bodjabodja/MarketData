@@ -6,6 +6,7 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -19,17 +20,20 @@ import java.util.zip.ZipInputStream;
 public class Analizator {
     private String fileInput;
     private String fileOutput;
-    private ArrayList<MessageActionNew> messageActionNewsList = new ArrayList<>();
-    private ReportTable rt;
+   // private ArrayList<MessageActionNew> messageActionNewsList = new ArrayList<>();
+   // private ReportTable rt;
     public Analizator() throws ProtocolCodecException {
         fileInput=getFilePath("Choose log File");
         System.out.println(fileInput);
-        //messageActionNewsList.add(new MessageActionNew("","",false,"",""));
-       // messageActionNewsList.add(new MessageActionNew("asdgf","",true,"",""));
-        rt = new ReportTable(messageActionNewsList);
-       // rt.addDynamicRow(new MessageActionNew("asdgf","",true,"",""));
+       // messageActionNewsList.add(new MessageActionNew("","",false,"",""));
+//        for (int i = 0; i <35 ; i++) {
+//        messageActionNewsList.add(new MessageActionNew("asdgf","dfjgdfjg",true,"dfg","dfghdfhj"));}
+//        rt = new ReportTable(messageActionNewsList);
+//        rt.showTable();
+        //System.out.println("sdfgbsd");
+       //rt.addDynamicRow(new MessageActionNew("asdgf","",true,"",""));
 
-        //messageListDecoder(new File(fileInput));
+        messageListDecoder(new File(fileInput));
 
 
     }
@@ -135,6 +139,7 @@ public class Analizator {
         String pair="";
         String price="";
         String size="";
+        ReportTable rt=null;
         ArrayList<MessageActionNew> newActions=new ArrayList<>();
         ArrayList<MessageActionDelete> dellActions = new ArrayList<>();
         for (String s : list) {
@@ -171,6 +176,7 @@ public class Analizator {
 
             if(typeOfMeth.equals("0") && !id.equals("") && !pair.equals("") && !price.equals("") && !size.equals("")){
                 newActions.add(new MessageActionNew(id,pair,bool,price,size));
+                //messageActionNewsList.add(new MessageActionNew(id,pair,bool,price,size) );
                 id=pair=price=size="";
             }
 
@@ -181,10 +187,21 @@ public class Analizator {
             }
         }
 
-        for (MessageActionNew m:newActions) {
-            rt.addDynamicRow(m);
+        if (newActions.size() > 0) {
+            rt = new ReportTable(newActions);
+          //  rt.showTable();
+            try {
+                rt.writeToFileInHTML(fileInput.substring(0,fileInput.lastIndexOf("/")+1)+"report2.html");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println("op tablihka");
+            //rt.closeTable();
         }
-
+//        for (MessageActionNew m:newActions) {
+//            rt.addDynamicRow(m);
+//        }
+    //    rt.showTable();
 
         System.out.println("Finish message!");
     }
@@ -285,25 +302,46 @@ class ReportTable{
         jfrm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         rt= new ReportTableModel(messageActionNewArrayList);
         this.jTable = new JTable(rt);
-        //this.jTable = new JTable(new DefaultTableModel());
-//        JScrollPane jscrlp = new JScrollPane(jTable);
-//        jTable.setPreferredScrollableViewportSize(new Dimension(250, 100));
-//        jfrm.getContentPane().add(jscrlp);
-//        jfrm.setVisible(true);
     }
 
+    public void writeToFileInHTML(String filepath) throws IOException {
+        BufferedWriter bw = new BufferedWriter(new FileWriter(filepath, true));
+        TableModel model = jTable.getModel();
+        bw.append("<h1>New message income</h1>");
+        bw.append("<table>");
+        for(int r=0;r<model.getRowCount();++r) {
+            bw.append("<tr>");
+            for(int c=0;c<model.getColumnCount();++c) {
+                bw.append("<td>");
+                bw.append(model.getValueAt(r,c).toString());
+                bw.append("</td>");
+            }
+        }
+        bw.append("</table>");
+        bw.close();
+    }
 //    public void addMesage(MessageActionNew messageActionNew){
 //        //jTable.add(messageActionNew.getId(),messageActionNew.getBid(),messageActionNew.getPair(),messageActionNew.getPrice(),messageActionNew.getSize());
 //
 //    }
+
     public void addDynamicRow(MessageActionNew messageActionNew){
         messageActionNewArrayList.add(messageActionNew);
         rt.fireTableDataChanged();
     }
 
-    public void deleteRow(){
+    public void deleteRow(String value){
+            for (int i = rt.getRowCount() - 1; i >= 0; --i) {
+                for (int j = rt.getColumnCount() - 1; j >= 0; --j) {
+                    if (rt.getValueAt(i, j).equals(value)) {
+                        // what if value is not unique?
+                        DefaultTableModel model = (DefaultTableModel) jTable.getModel();
+                        model.removeRow(i);
+                    }
+                }
+            }
+        }
 
-    }
 
     public void showTable(){
         JScrollPane jscrlp = new JScrollPane(jTable);
@@ -311,6 +349,7 @@ class ReportTable{
         jfrm.getContentPane().add(jscrlp);
         jfrm.setVisible(true);
     }
+
 }
 
 class ReportTableModel extends AbstractTableModel {
