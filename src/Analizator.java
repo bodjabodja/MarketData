@@ -24,8 +24,8 @@ public class Analizator {
     public Analizator() throws ProtocolCodecException {
         fileInput=getFilePath("Choose log File");
         System.out.println(fileInput);
-
-        messageListDecoder(new File(fileInput));
+        unZipIt();
+        messageListDecoder(new File(fileOutput));
 
 
     }
@@ -49,12 +49,63 @@ public class Analizator {
                         + nextFile.getAbsolutePath());
             }
             zis.close();
+
         }catch (FileNotFoundException e){
             e.getMessage();
         }catch (IOException e1){
             e1.getMessage();
         }
         return nextFile;
+    }
+
+    public void unZipIt(){
+
+        byte[] buffer = new byte[1024];
+
+        try{
+
+            //create output directory is not exists
+            File folder = new File(fileInput.substring(0,fileInput.lastIndexOf("/")+1)+"MarketData");
+            if(!folder.exists()){
+                folder.mkdir();
+            }
+
+            //get the zip file content
+            ZipInputStream zis =
+                    new ZipInputStream(new FileInputStream(fileInput));
+            //get the zipped file list entry
+            ZipEntry ze = zis.getNextEntry();
+
+            while(ze!=null){
+
+                String fileName = ze.getName();
+                File newFile = new File(folder + File.separator + fileName);
+                this.fileOutput=newFile.getAbsoluteFile().getAbsolutePath();
+                System.out.println("file unzip : "+ newFile.getAbsoluteFile());
+
+                //create all non exists folders
+                //else you will hit FileNotFoundException for compressed folder
+                new File(newFile.getParent()).mkdirs();
+
+                FileOutputStream fos = new FileOutputStream(newFile);
+
+                int len;
+                while ((len = zis.read(buffer)) > 0) {
+                    fos.write(buffer, 0, len);
+                }
+
+                fos.close();
+                ze = zis.getNextEntry();
+            }
+
+            zis.closeEntry();
+            zis.close();
+
+            System.out.println("Done");
+
+        }catch(IOException ex){
+            ex.printStackTrace();
+        }
     }
 
     private String destinationDirectory(final String srcZip) {
@@ -99,11 +150,11 @@ public class Analizator {
 
     private  String getFilePath(String dialogTitle){
         String filePath="";
-        String[] filters = {"summary"};
+        String[] filters = {"zip"};
         JFileChooser dialog = new JFileChooser();
         dialog.setDialogTitle(dialogTitle);
         dialog.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("summary", filters);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("zip", filters);
         dialog.setFileFilter(filter);
         try{
             dialog.showOpenDialog(null);
@@ -183,7 +234,7 @@ public class Analizator {
             newActions.addAll(dellActions);
             rt = new ReportTable(newActions);
             try {
-                rt.writeToFileInHTML(fileInput.substring(0,fileInput.lastIndexOf("/")+1)+"report2.html");
+                rt.writeToFileInHTML(fileInput.substring(0,fileOutput.lastIndexOf("/")+1)+"report2.html");
             } catch (IOException e) {
                 e.printStackTrace();
             }
