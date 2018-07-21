@@ -1,4 +1,3 @@
-import com.sun.deploy.panel.JreTableModel;
 import org.apache.mina.filter.codec.ProtocolCodecException;
 import quickfix.*;
 import quickfix.mina.message.FIXMessageDecoder;
@@ -20,18 +19,11 @@ import java.util.zip.ZipInputStream;
 public class Analizator {
     private String fileInput;
     private String fileOutput;
-   // private ArrayList<MessageActionNew> messageActionNewsList = new ArrayList<>();
     private ReportTable rt=null;
+
     public Analizator() throws ProtocolCodecException {
         fileInput=getFilePath("Choose log File");
         System.out.println(fileInput);
-       // messageActionNewsList.add(new MessageActionNew("","",false,"",""));
-//        for (int i = 0; i <35 ; i++) {
-//        messageActionNewsList.add(new MessageActionNew("asdgf","dfjgdfjg",true,"dfg","dfghdfhj"));}
-//        rt = new ReportTable(messageActionNewsList);
-//        rt.showTable();
-        //System.out.println("sdfgbsd");
-       //rt.addDynamicRow(new MessageActionNew("asdgf","",true,"",""));
 
         messageListDecoder(new File(fileInput));
 
@@ -176,7 +168,6 @@ public class Analizator {
 
             if(typeOfMeth.equals("0") && !id.equals("") && !pair.equals("") && !price.equals("") && !size.equals("")){
                 newActions.add(new MessageActionNew(id,pair,bool,price,size));
-                //messageActionNewsList.add(new MessageActionNew(id,pair,bool,price,size) );
                 id=pair=price=size="";
             }
 
@@ -191,19 +182,14 @@ public class Analizator {
         if (newActions.size() > 0) {
             newActions.addAll(dellActions);
             rt = new ReportTable(newActions);
-          //  rt.showTable();
             try {
                 rt.writeToFileInHTML(fileInput.substring(0,fileInput.lastIndexOf("/")+1)+"report2.html");
             } catch (IOException e) {
                 e.printStackTrace();
             }
             System.out.println("op tablihka");
-            //rt.closeTable();
         }
-//        for (MessageActionNew m:newActions) {
-//            rt.addDynamicRow(m);
-//        }
-    //    rt.showTable();
+
 
         System.out.println("Finish message!");
     }
@@ -232,43 +218,6 @@ class MessageActionNew{
     public String getPair(){return pair;}
 }
 
-class MessageActionDelete{
-    private String id;
-    private String pair;
-    private boolean bid=false;
-    private boolean offer=false;
-
-    MessageActionDelete(boolean bool,String id, String pair){
-        if(bool){
-            bid=true;
-        }else{
-            offer=true;
-        }
-        this.id=id;
-        this.pair=pair;
-        deleteFromTable();
-    }
-
-    private void deleteFromTable(){
-        if(bid){
-            deleteBid();
-        }
-
-        if(offer){
-            deleteOffer();
-        }
-    }
-
-    private void deleteBid(){
-        System.out.println("Delete bid : "+id);
-    }
-
-    private  void deleteOffer(){
-        System.out.println("delete offer: "+id);
-    }
-}
-
-
 class ReportTable{
     private JTable jTable;
     private JFrame jfrm;
@@ -289,6 +238,12 @@ class ReportTable{
         TableModel model = jTable.getModel();
         bw.append("<h1>New message income</h1>");
         bw.append("<table>");
+        bw.append("<tr>");
+        for (int i = 0; i <model.getColumnCount() ; i++) {
+            bw.append("<td>");
+            bw.append(jTable.getColumnName(i));
+            bw.append("</td>");
+        }
         for(int r=0;r<model.getRowCount();++r) {
             bw.append("<tr>");
             for(int c=0;c<model.getColumnCount();++c) {
@@ -300,10 +255,6 @@ class ReportTable{
         bw.append("</table>");
         bw.close();
     }
-//    public void addMesage(MessageActionNew messageActionNew){
-//        //jTable.add(messageActionNew.getId(),messageActionNew.getBid(),messageActionNew.getPair(),messageActionNew.getPrice(),messageActionNew.getSize());
-//
-//    }
 
     public void addDynamicRow(MessageActionNew messageActionNew){
         messageActionNewArrayList.add(messageActionNew);
@@ -336,10 +287,6 @@ class ReportTableModel extends AbstractTableModel {
     private ArrayList<MessageActionNew> messageActionNewArrayList;
     ReportTableModel(ArrayList<MessageActionNew> messageActionNewArrayList){
         this.messageActionNewArrayList=messageActionNewArrayList;
-    }
-
-    public void deleteRow(){
-        messageActionNewArrayList.remove(1);
     }
 
     @Override
@@ -388,8 +335,4 @@ class ReportTableModel extends AbstractTableModel {
         }
     }
 
-//    @Override
-//    public Object getValueAt(int rowIndex, int columnIndex) {
-//        return null;
-//    }
 }
