@@ -122,13 +122,11 @@ public class Analizator {
     }
 
     private void getMessage(String s) throws InvalidMessage {
-        System.out.println(s);
         String[] mar = s.split("\001");
         arrayAnalizer(mar);
     }
 
     private void arrayAnalizer(String[] array){
-        System.out.println("Start analize message");
         ArrayList<String> list = new ArrayList<>(Arrays.asList(array));
         String typeOfMeth="";
         String bool="";
@@ -192,11 +190,9 @@ public class Analizator {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            System.out.println("op tablihka");
+
         }
 
-
-        System.out.println("Finish message!");
     }
 
 }
