@@ -186,7 +186,7 @@ public class Analizator {
             newActions.addAll(dellActions);
             rt = new ReportTable(newActions);
             try {
-                rt.writeToFileInHTML(fileInput.substring(0,fileOutput.lastIndexOf("/")+1)+"report2.html");
+                rt.writeToFileInHTML(fileInput.substring(0,fileOutput.lastIndexOf("/")+1)+"_report.html");
             } catch (IOException e) {
                 e.printStackTrace();
             }
